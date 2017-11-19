@@ -5,7 +5,7 @@ PortGroup               muniversal 1.0
 
 name                    cyrus-sasl2
 version                 2.1.26
-revision                6
+revision                7
 categories              security net
 platforms               darwin
 # license is BSD plus a fourth (almost redundant) acknowledgement clause
@@ -36,7 +36,11 @@ checksums               rmd160  861a06d663cf3da37a198d0f971d99b249b5f4b8 \
 depends_lib             path:lib/libssl.dylib:openssl \
                         port:zlib
 
-default_variants        +kerberos
+if {${os.platform} eq "darwin" && ${os.major} < 11} {
+    default_variants    +kerberos5
+} else {
+    default_variants    +system
+}
 
 patchfiles              patch-libsasl2.pc.in.diff \
                         patch-ltconfig_rpath_fallback.diff \
@@ -95,19 +99,26 @@ post-destroot {
     delete {*}[glob ${destroot}${prefix}/share/doc/${name}/*Makefile*]
 }
 
-variant kerberos description "Enable Kerberos support" {
-    configure.args-append   --enable-keep-db-open
-    
-    if {${os.platform} eq "darwin"} {
-        depends_lib-append  port:kerberos5
-        configure.args-replace  --disable-gssapi --enable-gssapi=${prefix}
-        configure.args-append   --with-gss_impl=mit
-    }
-    if {${os.platform} eq "freebsd"} {
-        depends_lib-append  port:heimdal
-        configure.args-replace  --disable-gssapi --enable-gssapi=${prefix}
-        configure.args-append   --with-gss_impl=heimdal
-    }
+variant system description "Enable System Kerberos support" conflicts kerberos5 heimdal {
+    # Link against system libs;
+    # Even though darwin > 11 uses heimdal, it's still detected as mit by cyrus;
+    # Libraries in /usr/lib follow mit naming conventions:
+    #   /usr/lib/libkrb5.dylib -> /System/Library/Frameworks/Kerberos.framework/Kerberos
+    #   /usr/lib/libgssapi_krb5.dylib -> /System/Library/Frameworks/Kerberos.framework/Kerberos
+    configure.args-replace  --disable-gssapi --enable-gssapi=/usr
+    configure.args-append   --enable-keep-db-open --with-gss_impl=mit 
+}
+
+variant heimdal description "Enable Heimdal Kerberos support" conflicts kerberos5 system {
+    depends_lib-append  port:heimdal
+    configure.args-replace  --disable-gssapi --enable-gssapi=${prefix}
+    configure.args-append   --enable-keep-db-open --with-gss_impl=heimdal
+}
+
+variant kerberos5 description "Enable MIT Kerberos support" conflicts heimdal system {
+    depends_lib-append port:kerberos5
+    configure.args-replace --disable-gssapi --enable-gssapi=${prefix}
+    configure.args-append --enable-keep-db-open --with-gss_impl=mit
 }
 
 variant sql description "Enable SQL support" {
