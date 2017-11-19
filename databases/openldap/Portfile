@@ -26,21 +26,19 @@ depends_lib     path:bin/perl:perl5 \
                 port:tcp_wrappers \
                 port:cyrus-sasl2 \
                 path:lib/libssl.dylib:openssl \
-                port:db48 \
                 port:icu
 
 patchfiles      patch-ltmain \
                 libressl.patch
 
 configure.env-append        LANG=C
-configure.cppflags-append   -I${prefix}/include/db48 -I${prefix}/include/openssl -DBIND_8_COMPAT
+configure.cppflags-append   -I${prefix}/include/openssl -DBIND_8_COMPAT
 platform darwin {
     configure.cppflags-append -DMDB_FDATASYNC=fsync
     if {${os.major} <= 9} {
         configure.cppflags-append -DMDB_DSYNC=O_SYNC 
     }
 }
-configure.ldflags-append    -L${prefix}/lib/db48
 
 configure.args  --mandir=${prefix}/share/man \
                 --localstatedir=${prefix}/var \
@@ -49,7 +47,9 @@ configure.args  --mandir=${prefix}/share/man \
                 --enable-crypt \
                 --enable-wrappers \
                 --enable-syncprov \
-                --enable-ipv6
+                --enable-ipv6 \
+                --disable-bdb \
+                --disable-hdb
 
 startupitem.create  yes
 startupitem.name    slapd
