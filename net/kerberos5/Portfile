@@ -6,7 +6,7 @@ PortGroup                   compiler_blacklist_versions 1.0
 name                        kerberos5
 version                     1.15.2
 set branch                  [join [lrange [split ${version} .] 0 1] .]
-conflicts                   fbopenssl
+conflicts                   fbopenssl heimdal
 categories                  net security
 maintainers                 {ryandesign @ryandesign} openmaintainer
 license                     MIT BSD ISC OpenLDAP-2.8+

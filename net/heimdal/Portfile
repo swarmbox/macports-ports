@@ -8,11 +8,13 @@ github.tarball_from releases
 checksums           rmd160  3d25ebc96df785f4d6691b826f59c2584980ff6b \
                     sha256  3de14ecd36ad21c1694a13da347512b047f4010d176fe412820664cb5d1429ad
 
+conflicts           kerberos5
+
 maintainers         nomaintainer
 categories          net security
 platforms           darwin
 
-license             BSD
+license             BSD MIT Permissive
 homepage            http://www.h5l.org/
 description         Heimdal is a Kerberos 5 implementation.
 long_description    \
@@ -27,9 +29,6 @@ depends_lib         port:readline \
                     port:libtasn1 \
                     port:libcomerr
 
-# Use a separate prefix to avoid conflicts with the port kerberos5
-# (and openssl, if that variant is selected)
-configure.pre_args  --prefix=${prefix}/libexec/heimdal
 configure.args      \
     --sysconfdir=${prefix}/etc \
     --enable-shared            \
