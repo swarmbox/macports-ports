@@ -1,0 +1,56 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+PortSystem          1.0
+PortGroup           cxx11 1.1
+PortGroup           cmake 1.0
+PortGroup           github 1.0
+
+github.setup        ethereum cpp-ethereum 1.3.0
+
+fetch.type          git
+git.branch          develop
+
+post-fetch {
+    system -W ${worksrcpath} "git submodule update --init"
+}
+
+homepage            http://cpp-ethereum.org
+categories          finance
+
+description         C++ Client for the Ethereum Blockchain Platform
+long_description    Ethereum is an open blockchain platform that lets anyone \
+                    build and use decentralized applications that run on \
+                    blockchain technology.
+license             GPL-3
+maintainers         nomaintainer
+
+platforms           darwin
+
+depends_build-append port:cmake
+
+depends_lib-append  port:boost \
+                    port:curl \
+                    port:gmp \
+                    port:leveldb \
+                    port:libjson-rpc-cpp \
+                    port:miniupnpc \
+                    port:libcryptopp
+
+post-patch {
+#    reinplace "s|hunter_add_package|#hunter_add_package|g" ${worksrcpath}/CMakeLists.txt
+#    reinplace "s|Boost CONFIG REQUIRED|Boost 1.65.1 REQUIRED COMPONENTS|" ${worksrcpath}/CMakeLists.txt
+#    reinplace "s|jsoncpp CONFIG REQUIRED|jsoncpp 1.8.3 REQUIRED|" ${worksrcpath}/CMakeLists.txt
+#    reinplace "s|Snappy CONFIG REQUIRED|Snappy 1.1.3 REQUIRED|" ${worksrcpath}/CMakeLists.txt
+#    reinplace "s|cryptopp CONFIG REQUIRED|cryptocpp 5.6.5 REQUIRED|" ${worksrcpath}/CMakeLists.txt
+    reinplace "s|#include <jsonrpccpp|#include <${worksrcpath}/deps/src/jsonrpccpp/src/jsonrpccpp|g" \
+        ${worksrcpath}/libweb3jsonrpc/IpcServerBase.h
+}
+
+#configure.args-append -DHUNTER_ENABLED=NO \
+#                    -DBoost_NO_BOOST_CMAKE=ON \
+#                    -DBOOST_ROOT=${prefix} \
+#                    -DBoost_DEBUG=ON \
+#                    -DBoost_DETAILED_FAILURE_MESSAGE=ON
+
+destroot.target     install
+
